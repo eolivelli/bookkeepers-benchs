@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>xxx</groupId>
-    <artifactId>xxx</artifactId>
+    <groupId>benchmarks</groupId>
+    <artifactId>bookkeeper-benchs</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>                
@@ -23,8 +23,8 @@
                 <configuration>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
-                    <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
-                    <argLine>-Xmx2G -Djava.io.tmpdir=${basedir}/target</argLine>
+                    <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>                    
+                    <argLine>-Xms2G -Xmx2G -Djava.io.tmpdir=${basedir}/target -XX:+PrintGC -Xloggc:target/gc.log -XX:+UseG1GC</argLine>
                 </configuration>
             </plugin>           
         </plugins>
