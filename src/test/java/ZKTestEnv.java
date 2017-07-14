@@ -47,7 +47,18 @@ public class ZKTestEnv implements AutoCloseable {
         Path targetDir = path.resolve("bookie_data");
         conf.setZkServers("localhost:1282");
         conf.setLedgerDirNames(new String[]{targetDir.toAbsolutePath().toString()});
-        conf.setJournalDirName(targetDir.toAbsolutePath().toString());
+
+        int numJournals = 1;
+        String[] journals = new String[numJournals];
+        for (int i = 0; i < journals.length; i++) {
+            Path jpath = targetDir.resolve("journal-" + i);
+            journals[i] = jpath.toAbsolutePath().toString();
+        }
+
+//        conf.setWriteBufferBytes(1024 * 1024);
+//        conf.setJournalBufferedEntriesThreshold(10000);
+//        conf.setJournalRemovePagesFromCache(true);
+        conf.setJournalDirsName(journals);
         conf.setFlushInterval(1000);
         conf.setJournalFlushWhenQueueEmpty(true);
         conf.setProperty("journalMaxGroupWaitMSec", 5); // default 200ms

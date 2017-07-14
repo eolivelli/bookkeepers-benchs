@@ -19,6 +19,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+/**
+ *
+ * @author enrico.olivelli
+ */
 public class BookKeeperWriteTest {
 
     static {
@@ -39,7 +43,7 @@ public class BookKeeperWriteTest {
             ClientConfiguration clientConfiguration = new ClientConfiguration();
 
             // this is like (sleep(1)) in the loop below
-            clientConfiguration.setThrottleValue(1000);
+            clientConfiguration.setThrottleValue(0);
 
             clientConfiguration.setZkServers(env.getAddress());
 
@@ -51,7 +55,7 @@ public class BookKeeperWriteTest {
 
             try (BookKeeper bk = new BookKeeper(clientConfiguration);) {
 
-                for (int j = 0; j < 10; j++) {
+                for (int j = 0; j < 1000; j++) {
                     try (
                         LedgerHandle lh = bk.createLedger(1, 1, 1, BookKeeper.DigestType.CRC32, new byte[0])) {
                         LongAdder totalTime = new LongAdder();
@@ -85,9 +89,9 @@ public class BookKeeperWriteTest {
                         }
                         long _stop = System.currentTimeMillis();
                         double delta = _stop - _start;
-                        System.out.printf("#" + j + " Total wall clock time: " + delta + " ms, "
-                            + "total callbacks time: " + totalTime.sum() + " ms, "
-                            + "entry size %.3f MB -> %.2f ms per entry (latency),"
+                        System.out.printf("#" + j + " Wall clock time: " + delta + " ms, "
+                            // + "total callbacks time: " + totalTime.sum() + " ms, "
+                            + "size %.3f MB -> %.2f ms per entry (latency),"
                             + "%.1f ms per entry (throughput) %.1f MB/s throughput%n",
                             (TEST_DATA.length / (1024 * 1024d)),
                             (totalTime.sum() * 1d / TESTSIZE),
