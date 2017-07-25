@@ -58,13 +58,13 @@ public class ZKTestEnv implements AutoCloseable {
 //        conf.setWriteBufferBytes(1024 * 1024);
 //        conf.setJournalBufferedEntriesThreshold(10000);
 //        conf.setJournalRemovePagesFromCache(true);
-        conf.setJournalDirsName(journals);
+        conf.setJournalDirName(journals[0]);
         conf.setFlushInterval(1000);
         conf.setJournalFlushWhenQueueEmpty(true);
         conf.setProperty("journalMaxGroupWaitMSec", 5); // default 200ms
 //        conf.setProperty("journalBufferedWritesThreshold", 1024);
         conf.setAutoRecoveryDaemonEnabled(false);
-        conf.setEnableLocalTransport(true);
+        conf.setEnableLocalTransport(false);
         conf.setAllowLoopback(true);
 
         ClientConfiguration adminConf = new ClientConfiguration(conf);

@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -48,8 +49,7 @@ public class BookKeeperWriteSynchClientsTest {
             clientConfiguration.setZkServers(env.getAddress());
 
             // this reduce most of GC
-            clientConfiguration.setUseV2WireProtocol(true);
-
+//            clientConfiguration.setUseV2WireProtocol(true);
             try (BookKeeper bk = new BookKeeper(clientConfiguration);) {
 
                 for (int j = 0; j < 1000; j++) {
