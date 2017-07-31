@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,8 +27,8 @@ import org.junit.rules.TemporaryFolder;
 public class BookKeeperWriteSynchClientsTest {
 
     static {
-        LogManager.getLogManager().reset();
-        Logger.getRootLogger().setLevel(Level.INFO);
+//        LogManager.getLogManager().reset();
+//        Logger.getRootLogger().setLevel(Level.INFO);
     }
 
     private static final byte[] TEST_DATA = new byte[35 * 1024];
@@ -39,6 +40,7 @@ public class BookKeeperWriteSynchClientsTest {
 
     @Test
     public void test() throws Exception {
+        System.out.println("PID: "+ManagementFactory.getRuntimeMXBean().getName());
         try (ZKTestEnv env = new ZKTestEnv(tmp.newFolder("zk").toPath());) {
             env.startBookie();
             ClientConfiguration clientConfiguration = new ClientConfiguration();
