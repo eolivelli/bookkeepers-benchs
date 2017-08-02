@@ -1,6 +1,4 @@
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.io.File;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -48,10 +46,7 @@ public class BookKeeperWriteTest {
             clientConfiguration.setZkServers(env.getAddress());
 
             // this reduce most of GC
-            clientConfiguration.setUseV2WireProtocol(true);
-
-            ByteBuf data = Unpooled.directBuffer(TEST_DATA.length);
-            data.writeBytes(TEST_DATA);
+//            clientConfiguration.setUseV2WireProtocol(true);            
 
             try (BookKeeper bk = new BookKeeper(clientConfiguration);) {
 
@@ -64,7 +59,7 @@ public class BookKeeperWriteTest {
                         for (int i = 0; i < TESTSIZE; i++) {
                             CompletableFuture cf = new CompletableFuture();
                             batch.add(cf);
-                            lh.asyncAddEntry(data, new AsyncCallback.AddCallback() {
+                            lh.asyncAddEntry(TEST_DATA, new AsyncCallback.AddCallback() {
 
                                 long start = System.currentTimeMillis();
 

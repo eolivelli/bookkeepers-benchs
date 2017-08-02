@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.LogManager;
 import org.apache.bookkeeper.client.AsyncCallback;
@@ -33,14 +34,16 @@ public class BookKeeperWriteSynchClientsTest {
 
     private static final byte[] TEST_DATA = new byte[35 * 1024];
     private static final int TESTSIZE = 1000;
-    private static final int clientwriters = 10;
+    private static final int CLIENTS = 10;
+    private static final int ITERATIONS = 1000;
 
     @Rule
     public final TemporaryFolder tmp = new TemporaryFolder(new File("target").getAbsoluteFile());
 
     @Test
     public void test() throws Exception {
-        System.out.println("PID: "+ManagementFactory.getRuntimeMXBean().getName());
+        AtomicLong numLedgers = new AtomicLong();
+        System.out.println("PID: " + ManagementFactory.getRuntimeMXBean().getName());
         try (ZKTestEnv env = new ZKTestEnv(tmp.newFolder("zk").toPath());) {
             env.startBookie();
             ClientConfiguration clientConfiguration = new ClientConfiguration();
@@ -54,7 +57,7 @@ public class BookKeeperWriteSynchClientsTest {
 //            clientConfiguration.setUseV2WireProtocol(true);
             try (BookKeeper bk = new BookKeeper(clientConfiguration);) {
 
-                for (int j = 0; j < 1000; j++) {
+                for (int j = 0; j < ITERATIONS; j++) {
 
                     LongAdder totalTime = new LongAdder();
                     long _start = System.currentTimeMillis();
@@ -63,7 +66,7 @@ public class BookKeeperWriteSynchClientsTest {
 
                     Map<String, AtomicInteger> numMessagesPerClient = new ConcurrentHashMap<>();
 
-                    Thread[] clients = new Thread[clientwriters];
+                    Thread[] clients = new Thread[CLIENTS];
                     for (int tname = 0; tname < clients.length; tname++) {
                         final String name = "client-" + tname;
                         final int _tname = tname;
@@ -74,7 +77,8 @@ public class BookKeeperWriteSynchClientsTest {
                             public void run() {
                                 try (
                                     LedgerHandle lh = bk.createLedger(1, 1, 1, BookKeeper.DigestType.CRC32, new byte[0])) {
-                                    for (int i = 0; i < TESTSIZE / clientwriters; i++) {
+                                    numLedgers.incrementAndGet();
+                                    for (int i = 0; i < TESTSIZE / CLIENTS; i++) {
                                         writeData(_tname, lh, counter, totalTime);
                                         totalDone.incrementAndGet();
                                     }
@@ -94,7 +98,7 @@ public class BookKeeperWriteSynchClientsTest {
                     }
 
                     for (Map.Entry<String, AtomicInteger> entry : numMessagesPerClient.entrySet()) {
-                        assertEquals("bad count for " + entry.getKey(), TESTSIZE / clientwriters, entry.getValue().get());
+                        assertEquals("bad count for " + entry.getKey(), TESTSIZE / CLIENTS, entry.getValue().get());
                     }
                     assertEquals(TESTSIZE, totalDone.get());
 
@@ -103,11 +107,13 @@ public class BookKeeperWriteSynchClientsTest {
                     System.out.printf("#" + j + " Wall clock time: " + delta + " ms, "
                         // + "total callbacks time: " + totalTime.sum() + " ms, "
                         + "size %.3f MB -> %.2f ms per entry (latency),"
-                        + "%.1f ms per entry (throughput) %.1f MB/s throughput%n",
+                        + "%.1f ms per entry (throughput) %.1f MB/s throughput "
+                        + "%d ledgers%n",
                         (TEST_DATA.length / (1024 * 1024d)),
                         (totalTime.sum() * 1d / TESTSIZE),
                         (delta / TESTSIZE),
-                        ((((TESTSIZE * TEST_DATA.length) / (1024 * 1024d))) / (delta / 1000d)));
+                        ((((TESTSIZE * TEST_DATA.length) / (1024 * 1024d))) / (delta / 1000d)),
+                        numLedgers.intValue());
 
                 }
             }
